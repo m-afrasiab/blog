@@ -1,0 +1,82 @@
+<ons-page id="merit">
+  <ons-toolbar>
+    <div class="left">
+      <ons-back-button>Back</ons-back-button>
+    </div>
+    <div class="center urduf1">Merit Based Scholarships </div>
+  </ons-toolbar>
+
+  <ons-list class="listv">
+
+
+  </ons-list>
+  <script>
+
+  var url = "https://www.blogger.com/feeds/5668590207052029482/posts/default/-/merit?max-results=999&alt=json-in-script&callback=?";
+
+  $.ajax({
+    type: 'GET',
+    url: url,
+    async: false,
+    contentType: "application/json",
+    dataType: 'jsonp',
+    timeout: 5000,
+    success: function (json) {
+      posts(json);
+    },
+    error: function (xOptions, textStatus) {
+      $("#dialog #title").html(textStatus);
+      $("#dialog #content").html("" + xOptions.context);
+      $.mobile.changePage('#dialog', { transition: 'pop', role: 'dialog' });
+    }
+  });
+
+  function posts(json) {
+    var myarray = [];
+    var postUrl = [];
+    var ids = [];
+    for (i = 0; i < json.feed.entry.length; i++)
+      myarray.push(json.feed.entry[i].title.$t);
+    for (i = 0; i < json.feed.entry.length; i++)
+      ids.push(json.feed.entry[i].id.$t);
+    for (i = 0; i < json.feed.entry.length; i++)
+      ids[i] = ids[i].replace(/:/g, '').replace(/,/g, '').split('.').join("");
+    for (i = 0; i < json.feed.entry.length; i++) {
+      for (var j = 0; j < json.feed.entry[i].link.length; j++) {
+        if (json.feed.entry[i].link[j].rel == 'self') {
+          postUrl.push(json.feed.entry[i].link[j].href);
+          break;
+        }
+      }
+    }
+
+    var listv = [];
+    for (i = 0; i < json.feed.entry.length; i++)
+      listv.push('<ons-list-item class="post' + i + '" id="' + ids[i] + '" alt="' + postUrl[i] + '">' + myarray[i] + '</ons-list-item>');
+    for (i = 0; i < json.feed.entry.length; i++)
+      document.querySelector('.listv').innerHTML += listv[i];
+
+    for (i = 0; i < json.feed.entry.length; i++)
+
+      $("#" + ids[i]).click(function () {
+        for (i = 0; i < json.feed.entry.length; i++)
+          var id = $(this).attr('alt');
+        var id = id.replace('https://www.blogger.com/feeds/', 'https://www.googleapis.com/blogger/v3/blogs/').replace('/default/', '/');
+        console.log(id)
+
+        $.getJSON(id + '?key=AIzaSyDpmJuqtMiXEnDUGyUrEzPlbAHuRQcQQB0', function (data) {
+
+          var content = data.content;
+          console.log(content)
+
+          $(".content").empty();
+          document.querySelector('.content').innerHTML += data.content;
+
+        })
+
+
+      });
+  }
+
+  </script>
+</ons-page>
